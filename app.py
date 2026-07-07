@@ -7,6 +7,12 @@ import plotly.graph_objects as go
 import joblib
 import os
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_FILE = os.path.join(BASE_DIR, "HR Data.xlsx")
+MODEL_FIXED_FILE = os.path.join(BASE_DIR, "rf_pipeline_fixed.pkl")
+MODEL_FILE = os.path.join(BASE_DIR, "rf_pipeline.pkl")
+USER_FILE = os.path.join(BASE_DIR, "users.json")
+
 # -------------------------------------------------------
 # PAGE CONFIG
 # -------------------------------------------------------
@@ -20,6 +26,13 @@ st.set_page_config(
 
 st.session_state.setdefault("theme", "Dark")
 
+st.sidebar.write("### Theme")
+st.sidebar.radio(
+    "Select mode",
+    ["Dark", "Light"],
+    key="theme"
+)
+
 # -------------------------------------------------------
 # CUSTOM CSS
 # -------------------------------------------------------
@@ -29,50 +42,66 @@ def get_theme_css(theme: str) -> str:
         return {
             "bg_main": "#f7f9fb",
             "bg_sidebar": "#ffffff",
+            "bg_sidebar_alt": "#f1f5f9",
             "panel": "#ffffff",
-            "panel_alt": "#f1f5f9",
+            "panel_alt": "#eef2f7",
             "muted_text": "#0f172a",
+            "heading_color": "#0f172a",
             "accent": "#2563eb",
             "border": "rgba(15,23,42,0.12)",
-            "alert_bg": "rgba(37,99,235,0.08)",
+            "alert_bg": "rgba(37,99,235,0.12)",
+            "alert_text": "#0f172a",
             "page_bg": "#f7f9fb",
             "header_border": "rgba(15,23,42,0.08)",
-            "input_bg": "rgba(15,23,42,0.04)",
+            "input_bg": "rgba(15,23,42,0.06)",
             "text": "#0f172a",
+            "placeholder": "rgba(15,23,42,0.55)",
         }
     return {
         "bg_main": "#020714",
         "bg_sidebar": "#081229",
+        "bg_sidebar_alt": "#061428",
         "panel": "#0c1f3b",
         "panel_alt": "#11284b",
         "muted_text": "#d8e8ff",
+        "heading_color": "#ffffff",
         "accent": "#58b4ff",
         "border": "rgba(255,255,255,0.10)",
         "alert_bg": "rgba(46,167,255,0.08)",
+        "alert_text": "#eaf6ff",
         "page_bg": "radial-gradient(circle at top, #081633 0%, #020714 70%)",
         "header_border": "rgba(255,255,255,0.08)",
         "input_bg": "rgba(255,255,255,0.05)",
         "text": "#d8e8ff",
+        "placeholder": "rgba(255,255,255,0.55)",
+        "metric_label": "#cbd5e1",
+        "metric_value": "#ffffff",
     }
 
 colors = get_theme_css(st.session_state["theme"])
+plotly_template = "plotly_dark" if st.session_state["theme"] == "Dark" else "plotly_white"
 
 st.markdown(f"""
 <style>
 :root{{
     --bg-main: {colors['bg_main']};
     --bg-sidebar: {colors['bg_sidebar']};
+    --bg-sidebar-alt: {colors['bg_sidebar_alt']};
     --panel: {colors['panel']};
     --panel-alt: {colors['panel_alt']};
     --muted-text: {colors['muted_text']};
+    --heading-color: {colors['heading_color']};
     --accent: {colors['accent']};
     --border: {colors['border']};
+    --alert-bg: {colors['alert_bg']};
+    --alert-text: {colors['alert_text']};
     --input-bg: {colors['input_bg']};
+    --placeholder: {colors['placeholder']};
     --page-bg: {colors['page_bg']};
     --text-color: {colors['text']};
 }}
 
-html, body, .main {{
+html, body, .main, [data-testid="stAppViewContainer"], section[data-testid="stAppViewContainer"], div[data-testid="stAppViewContainer"] {{
     background: var(--page-bg) !important;
     color: var(--muted-text) !important;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
@@ -83,24 +112,48 @@ html, body, .main {{
     padding-bottom:1.25rem;
     padding-left:1.25rem;
     padding-right:1.25rem;
+    background: transparent !important;
 }}
 
 h1, h2, h3, h4, h5 {{
-    color: #ffffff !important;
+    color: var(--heading-color) !important;
     margin: 0 0 0.35rem 0;
     font-weight: 600;
 }}
 
-section[data-testid="stSidebar"]{{
-    background: linear-gradient(180deg,var(--bg-sidebar), #e2e8f0) !important;
+section[data-testid="stSidebar"],
+section[data-testid="stSidebar"] [data-testid="stSidebarContent"],
+section[data-testid="stSidebar"] [data-testid="stSidebarHeader"],
+section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] {{
+    background: linear-gradient(180deg, var(--bg-sidebar), var(--bg-sidebar-alt)) !important;
     color: var(--muted-text) !important;
     border-right: 1px solid var(--border) !important;
 }}
 
-div[data-testid="stSidebar"] .css-1d391kg {{ color: var(--muted-text) !important; }}
+section[data-testid="stSidebar"] *,
+section[data-testid="stSidebar"] label,
+section[data-testid="stSidebar"] p,
+section[data-testid="stSidebar"] span {{
+    color: var(--muted-text) !important;
+}}
+
+section[data-testid="stSidebar"] .stButton>button,
+section[data-testid="stSidebar"] input,
+section[data-testid="stSidebar"] textarea,
+section[data-testid="stSidebar"] select,
+section[data-testid="stSidebar"] .stTextInput>div>input,
+section[data-testid="stSidebar"] .stTextInput>div>textarea {{
+    background-color: var(--input-bg) !important;
+    border: 1px solid var(--border) !important;
+    color: var(--text-color) !important;
+}}
+
+section[data-testid="stSidebar"] [data-testid="stSidebarCollapseButton"] button {{
+    color: var(--muted-text) !important;
+}}
 
 div[data-testid="stAppViewContainer"] {{
-    background: transparent !important;
+    background: var(--page-bg) !important;
 }}
 
 div[data-testid="stHeader"] {{
@@ -117,6 +170,18 @@ div[data-testid="metric-container"] {{
     box-shadow: 0 10px 24px rgba(0,0,0,0.24);
 }}
 
+div[data-testid="metric-container"] .stMetricValue {{
+    color: var(--metric_value) !important;
+    font-size: 2.2rem !important;
+    font-weight: 700 !important;
+}}
+
+div[data-testid="metric-container"] .stMetricLabel {{
+    color: var(--metric_label) !important;
+    font-size: 1rem !important;
+    font-weight: 600 !important;
+}}
+
 /* Improve buttons and inputs contrast */
 button, .stButton>button, input, textarea, select {{
     background-color: var(--input-bg) !important;
@@ -125,7 +190,7 @@ button, .stButton>button, input, textarea, select {{
 }}
 
 input::placeholder, textarea::placeholder {{
-    color: rgba(255,255,255,0.55) !important;
+    color: var(--placeholder) !important;
 }}
 
 /* Make links and accents pop */
@@ -147,9 +212,9 @@ st.markdown("""
 <style>
 /* Style Streamlit alert banners (success/info) for centered, high-contrast appearance */
 div[data-testid="stAlert"] {
-    background: rgba(46,167,255,0.08) !important;
+    background: var(--alert-bg) !important;
     border-left: 4px solid var(--accent) !important;
-    color: #eaf6ff !important;
+    color: var(--alert-text) !important;
     border-radius: 12px !important;
     padding: 12px 20px !important;
     margin: 12px auto !important;
@@ -158,7 +223,7 @@ div[data-testid="stAlert"] {
     text-align: center !important;
 }
 
-div[data-testid="stAlert"] p { margin: 0 !important; color: #eaf6ff !important; font-weight: 600; }
+div[data-testid="stAlert"] p { margin: 0 !important; color: var(--alert-text) !important; font-weight: 600; }
 
 </style>
 """, unsafe_allow_html=True)
@@ -169,9 +234,19 @@ div[data-testid="stAlert"] p { margin: 0 !important; color: #eaf6ff !important; 
 
 @st.cache_data
 def load_data():
-    return pd.read_excel("HR Data.xlsx")
+    try:
+        return pd.read_excel(DATA_FILE, engine="openpyxl")
+    except FileNotFoundError:
+        st.error("Data file 'HR Data.xlsx' was not found in the app folder.")
+        return pd.DataFrame()
+    except Exception as e:
+        st.error(f"Unable to load data file: {e}")
+        return pd.DataFrame()
+
 
 df = load_data()
+if df.empty:
+    st.stop()
 
 # -------------------------------------------------------
 # LOAD MODEL
@@ -179,17 +254,20 @@ df = load_data()
 
 @st.cache_resource
 def load_model():
-
-    if os.path.exists("rf_pipeline_fixed.pkl"):
-        return joblib.load("rf_pipeline_fixed.pkl")
-
-    if os.path.exists("rf_pipeline.pkl"):
-        return joblib.load("rf_pipeline.pkl")
-
+    for model_path in (MODEL_FIXED_FILE, MODEL_FILE):
+        if os.path.exists(model_path):
+            try:
+                return joblib.load(model_path)
+            except Exception as e:
+                st.error(f"Unable to load model file '{os.path.basename(model_path)}': {e}")
+                return None
     return None
 
 
-USER_FILE = os.path.join(os.getcwd(), "users.json")
+DEFAULT_USERS = {
+    "admin": "admin123",
+    "hr": "hrpass"
+}
 
 DEFAULT_USERS = {
     "admin": "admin123",
@@ -271,14 +349,6 @@ model = load_model()
 # -------------------------------------------------------
 
 st.sidebar.title("🏢 HR Analytics")
-
-st.sidebar.write("### Theme")
-st.session_state["theme"] = st.sidebar.radio(
-    "Select mode",
-    ["Dark", "Light"],
-    index=0 if st.session_state["theme"] == "Dark" else 1,
-    key="theme_selector",
-)
 
 if st.session_state.next_page:
     st.session_state.selected_page_widget = st.session_state.next_page
@@ -503,7 +573,7 @@ if page == "🏠 Dashboard":
         )
 
         fig.update_layout(
-            template="plotly_dark",
+            template=plotly_template,
             height=420
         )
 
@@ -534,7 +604,7 @@ if page == "🏠 Dashboard":
         )
 
         fig.update_layout(
-            template="plotly_dark",
+            template=plotly_template,
             title="Education Field Wise Attrition",
             height=420
         )
@@ -597,7 +667,7 @@ if page == "🏠 Dashboard":
         )
 
         fig.update_layout(
-            template="plotly_dark",
+            template=plotly_template,
             title="Employees by Age Group",
             height=420
         )
@@ -633,7 +703,7 @@ if page == "🏠 Dashboard":
         )
 
         fig.update_layout(
-            template="plotly_dark",
+            template=plotly_template,
             title="Job Role Wise Attrition",
             height=450,
             xaxis_tickangle=-30
@@ -663,7 +733,7 @@ if page == "🏠 Dashboard":
         )
 
         fig.update_layout(
-            template="plotly_dark",
+            template=plotly_template,
             title="Business Travel Distribution",
             height=450
         )
@@ -690,7 +760,7 @@ if page == "🏠 Dashboard":
         )
 
         fig.update_layout(
-            template="plotly_dark",
+            template=plotly_template,
             title="Monthly Income Distribution",
             height=450
         )
@@ -711,7 +781,7 @@ if page == "🏠 Dashboard":
         )
 
         fig.update_layout(
-            template="plotly_dark",
+            template=plotly_template,
             title="Years At Company vs Attrition",
             height=450
         )
@@ -744,7 +814,7 @@ if page == "🏠 Dashboard":
 
         fig.update_layout(
             title="Job Satisfaction vs Attrition",
-            template="plotly_dark",
+            template=plotly_template,
             height=450
         )
 
@@ -774,7 +844,7 @@ if page == "🏠 Dashboard":
         )
 
         fig.update_layout(
-            template="plotly_dark",
+            template=plotly_template,
             title="Over Time Analysis",
             height=450
         )
@@ -802,7 +872,7 @@ if page == "🏠 Dashboard":
         )
 
         fig.update_layout(
-            template="plotly_dark",
+            template=plotly_template,
             title="Age Distribution",
             height=450
         )
@@ -832,7 +902,7 @@ if page == "🏠 Dashboard":
         )
 
         fig.update_layout(
-            template="plotly_dark",
+            template=plotly_template,
             title="Performance Rating",
             height=450
         )

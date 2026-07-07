@@ -9,3 +9,7 @@ __pycache__/
 .vscode/
 *.log
 users.json
+!HR Data.xlsx
+!rf_pipeline.pkl
+!rf_pipeline_fixed.pkl
+!users.json

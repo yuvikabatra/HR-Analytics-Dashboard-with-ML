@@ -8,7 +8,10 @@ Quick deploy to Streamlit Community Cloud
 4. Streamlit will build using `requirements.txt` and deploy the app.
 
 Notes
-- `users.json`, `*.pkl`, and `*.xlsx` are ignored by `.gitignore`. The app ships with default accounts (`admin`/`admin123`) if `users.json` is absent.
-- To persist user accounts on Streamlit Cloud, use external storage or update the app to use Streamlit Secrets / a database.
+- `users.json`, `*.pkl`, and `*.xlsx` were previously ignored by `.gitignore`, which can cause deployment failures because the app needs `HR Data.xlsx`, `rf_pipeline.pkl`/`rf_pipeline_fixed.pkl`, and `users.json` at runtime.
+- These files are now explicitly un-ignored in `.gitignore` so they can be committed and included in deploys.
+- When deploying to Streamlit Community Cloud, choose branch `main` and `app.py` as the entrypoint.
+- If `users.json` is missing, the app will still fall back to default accounts (`admin`/`admin123`), but commit `users.json` when you want persistent user account data.
+- To persist logins or production secrets safely, consider moving authentication storage to Streamlit Secrets or a database.
 
-If you want, I can: add a `Procfile`/`Dockerfile`, modify the app to store users in `st.secrets`, or add a GitHub Actions workflow to auto-deploy.
+If you want, I can also add a `Procfile`/`Dockerfile`, modify the app to store users in `st.secrets`, or add a GitHub Actions workflow to auto-deploy.
