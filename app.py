@@ -24,30 +24,84 @@ st.set_page_config(
 
 st.markdown("""
 <style>
+:root{
+    --bg-main: #071428; /* deep navy */
+    --bg-sidebar: #0f2a45; /* slightly brighter sidebar */
+    --panel: #0f3b63;
+    --muted-text: #cde1f6;
+    --accent: #2ea7ff;
+}
 
-.main{
-    background-color:#0B1727;
+html, body, .main {
+    background: var(--bg-main) !important;
+    color: var(--muted-text) !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
 }
 
 .block-container{
-    padding-top:1rem;
-    padding-bottom:1rem;
+    padding-top:1.25rem;
+    padding-bottom:1.25rem;
+    padding-left:1.25rem;
+    padding-right:1.25rem;
 }
 
-h1,h2,h3,h4,h5{
-    color:white;
+h1, h2, h3, h4, h5 {
+    color: #ffffff !important;
+    margin: 0 0 0.35rem 0;
+    font-weight: 600;
 }
 
 section[data-testid="stSidebar"]{
-    background:#10233F;
+    background: linear-gradient(180deg,var(--bg-sidebar), #0b2540) !important;
+    color: var(--muted-text) !important;
 }
 
-div[data-testid="metric-container"]{
-    background:#163A63;
-    border-radius:15px;
-    padding:15px;
-    border:1px solid #295D93;
+/* Metric / card styling */
+div[data-testid="metric-container"] {
+    background: linear-gradient(180deg, var(--panel), #12395a) !important;
+    border-radius: 12px !important;
+    padding: 14px !important;
+    border: 1px solid rgba(80,140,200,0.12) !important;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.35);
 }
+
+/* Improve buttons and inputs contrast */
+button, .stButton>button {
+    background-color: transparent !important;
+    border: 1px solid rgba(255,255,255,0.06) !important;
+    color: var(--muted-text) !important;
+}
+
+/* Sidebar headings */
+section[data-testid="stSidebar"] .css-1d391kg { color: var(--muted-text) !important; }
+
+/* Make links and accents pop */
+a, .st-a { color: var(--accent) !important; }
+
+/* Ensure good spacing on small screens */
+@media (max-width: 900px) {
+    .block-container{ padding-left: 0.75rem; padding-right: 0.75rem; }
+}
+
+</style>
+""", unsafe_allow_html=True)
+
+st.markdown("""
+<style>
+/* Style Streamlit alert banners (success/info) for centered, high-contrast appearance */
+div[data-testid="stAlert"] {
+    background: linear-gradient(90deg, rgba(46,167,255,0.10), rgba(46,167,255,0.03)) !important;
+    border-left: 4px solid var(--accent) !important;
+    color: #eaf6ff !important;
+    border-radius: 10px !important;
+    padding: 10px 18px !important;
+    margin: 12px auto !important;
+    max-width: 820px !important;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.28) !important;
+    text-align: center !important;
+}
+
+div[data-testid="stAlert"] p { margin: 0 !important; color: #eaf6ff !important; font-weight: 600; }
 
 </style>
 """, unsafe_allow_html=True)
@@ -106,15 +160,16 @@ def save_users(users):
         pass
 
 
-if "logged_in" not in st.session_state:
-    st.session_state.logged_in = False
-    st.session_state.username = ""
-    st.session_state.login_error = ""
-    st.session_state.signup_error = ""
-    st.session_state.signup_success = ""
-    st.session_state.page = "🔒 Login"
-    st.session_state.selected_page_widget = "🔒 Login"
-    st.session_state.next_page = None
+# Ensure all expected session-state keys exist. Use explicit defaults so
+# keys are present even when Streamlit preserves some state across reruns.
+st.session_state.setdefault("logged_in", False)
+st.session_state.setdefault("username", "")
+st.session_state.setdefault("login_error", "")
+st.session_state.setdefault("signup_error", "")
+st.session_state.setdefault("signup_success", "")
+st.session_state.setdefault("page", "🔒 Login")
+st.session_state.setdefault("selected_page_widget", "🔒 Login")
+st.session_state.setdefault("next_page", None)
 
 
 USERS = load_users()
@@ -151,6 +206,8 @@ def get_leave_probability(model, X):
 
 
 model = load_model()
+
+    # touch: trigger reload when running in dev to pick up session-state changes
 
 # -------------------------------------------------------
 # SIDEBAR
