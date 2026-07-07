@@ -25,15 +25,17 @@ st.set_page_config(
 st.markdown("""
 <style>
 :root{
-    --bg-main: #071428; /* deep navy */
-    --bg-sidebar: #0f2a45; /* slightly brighter sidebar */
-    --panel: #0f3b63;
-    --muted-text: #cde1f6;
-    --accent: #2ea7ff;
+    --bg-main: #020714;
+    --bg-sidebar: #081229;
+    --panel: #0c1f3b;
+    --panel-alt: #11284b;
+    --muted-text: #d8e8ff;
+    --accent: #58b4ff;
+    --border: rgba(255,255,255,0.10);
 }
 
 html, body, .main {
-    background: var(--bg-main) !important;
+    background: radial-gradient(circle at top, #081633 0%, #020714 70%) !important;
     color: var(--muted-text) !important;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
 }
@@ -52,31 +54,48 @@ h1, h2, h3, h4, h5 {
 }
 
 section[data-testid="stSidebar"]{
-    background: linear-gradient(180deg,var(--bg-sidebar), #0b2540) !important;
+    background: linear-gradient(180deg,var(--bg-sidebar), #061428) !important;
     color: var(--muted-text) !important;
+    border-right: 1px solid rgba(255,255,255,0.08) !important;
+}
+
+div[data-testid="stSidebar"] .css-1d391kg { color: var(--muted-text) !important; }
+
+div[data-testid="stAppViewContainer"] {
+    background: transparent !important;
+}
+
+div[data-testid="stHeader"] {
+    background: transparent !important;
+    border-bottom: 1px solid rgba(255,255,255,0.08) !important;
 }
 
 /* Metric / card styling */
 div[data-testid="metric-container"] {
-    background: linear-gradient(180deg, var(--panel), #12395a) !important;
-    border-radius: 12px !important;
-    padding: 14px !important;
-    border: 1px solid rgba(80,140,200,0.12) !important;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+    background: linear-gradient(180deg, var(--panel), var(--panel-alt)) !important;
+    border-radius: 14px !important;
+    padding: 16px !important;
+    border: 1px solid rgba(255,255,255,0.08) !important;
+    box-shadow: 0 10px 24px rgba(0,0,0,0.30);
 }
 
 /* Improve buttons and inputs contrast */
-button, .stButton>button {
-    background-color: transparent !important;
-    border: 1px solid rgba(255,255,255,0.06) !important;
+button, .stButton>button, input, textarea, select {
+    background-color: rgba(255,255,255,0.05) !important;
+    border: 1px solid rgba(255,255,255,0.12) !important;
     color: var(--muted-text) !important;
 }
 
-/* Sidebar headings */
-section[data-testid="stSidebar"] .css-1d391kg { color: var(--muted-text) !important; }
+input::placeholder, textarea::placeholder {
+    color: rgba(255,255,255,0.55) !important;
+}
 
 /* Make links and accents pop */
 a, .st-a { color: var(--accent) !important; }
+
+div[class*="plotly"] {
+    background: transparent !important;
+}
 
 /* Ensure good spacing on small screens */
 @media (max-width: 900px) {
@@ -90,14 +109,14 @@ st.markdown("""
 <style>
 /* Style Streamlit alert banners (success/info) for centered, high-contrast appearance */
 div[data-testid="stAlert"] {
-    background: linear-gradient(90deg, rgba(46,167,255,0.10), rgba(46,167,255,0.03)) !important;
+    background: rgba(46,167,255,0.08) !important;
     border-left: 4px solid var(--accent) !important;
     color: #eaf6ff !important;
-    border-radius: 10px !important;
-    padding: 10px 18px !important;
+    border-radius: 12px !important;
+    padding: 12px 20px !important;
     margin: 12px auto !important;
-    max-width: 820px !important;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.28) !important;
+    max-width: 840px !important;
+    box-shadow: 0 12px 26px rgba(0,0,0,0.28) !important;
     text-align: center !important;
 }
 
