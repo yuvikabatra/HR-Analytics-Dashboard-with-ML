@@ -18,89 +18,127 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+st.session_state.setdefault("theme", "Dark")
+
 # -------------------------------------------------------
 # CUSTOM CSS
 # -------------------------------------------------------
 
-st.markdown("""
-<style>
-:root{
-    --bg-main: #020714;
-    --bg-sidebar: #081229;
-    --panel: #0c1f3b;
-    --panel-alt: #11284b;
-    --muted-text: #d8e8ff;
-    --accent: #58b4ff;
-    --border: rgba(255,255,255,0.10);
-}
+def get_theme_css(theme: str) -> str:
+    if theme == "Light":
+        return {
+            "bg_main": "#f7f9fb",
+            "bg_sidebar": "#ffffff",
+            "panel": "#ffffff",
+            "panel_alt": "#f1f5f9",
+            "muted_text": "#0f172a",
+            "accent": "#2563eb",
+            "border": "rgba(15,23,42,0.12)",
+            "alert_bg": "rgba(37,99,235,0.08)",
+            "page_bg": "#f7f9fb",
+            "header_border": "rgba(15,23,42,0.08)",
+            "input_bg": "rgba(15,23,42,0.04)",
+            "text": "#0f172a",
+        }
+    return {
+        "bg_main": "#020714",
+        "bg_sidebar": "#081229",
+        "panel": "#0c1f3b",
+        "panel_alt": "#11284b",
+        "muted_text": "#d8e8ff",
+        "accent": "#58b4ff",
+        "border": "rgba(255,255,255,0.10)",
+        "alert_bg": "rgba(46,167,255,0.08)",
+        "page_bg": "radial-gradient(circle at top, #081633 0%, #020714 70%)",
+        "header_border": "rgba(255,255,255,0.08)",
+        "input_bg": "rgba(255,255,255,0.05)",
+        "text": "#d8e8ff",
+    }
 
-html, body, .main {
-    background: radial-gradient(circle at top, #081633 0%, #020714 70%) !important;
+colors = get_theme_css(st.session_state["theme"])
+
+st.markdown(f"""
+<style>
+:root{{
+    --bg-main: {colors['bg_main']};
+    --bg-sidebar: {colors['bg_sidebar']};
+    --panel: {colors['panel']};
+    --panel-alt: {colors['panel_alt']};
+    --muted-text: {colors['muted_text']};
+    --accent: {colors['accent']};
+    --border: {colors['border']};
+    --input-bg: {colors['input_bg']};
+    --page-bg: {colors['page_bg']};
+    --text-color: {colors['text']};
+}}
+
+html, body, .main {{
+    background: var(--page-bg) !important;
     color: var(--muted-text) !important;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
-}
+}}
 
-.block-container{
+.block-container{{
     padding-top:1.25rem;
     padding-bottom:1.25rem;
     padding-left:1.25rem;
     padding-right:1.25rem;
-}
+}}
 
-h1, h2, h3, h4, h5 {
+h1, h2, h3, h4, h5 {{
     color: #ffffff !important;
     margin: 0 0 0.35rem 0;
     font-weight: 600;
-}
+}}
 
-section[data-testid="stSidebar"]{
-    background: linear-gradient(180deg,var(--bg-sidebar), #061428) !important;
+section[data-testid="stSidebar"]{{
+    background: linear-gradient(180deg,var(--bg-sidebar), #e2e8f0) !important;
     color: var(--muted-text) !important;
-    border-right: 1px solid rgba(255,255,255,0.08) !important;
-}
+    border-right: 1px solid var(--border) !important;
+}}
 
-div[data-testid="stSidebar"] .css-1d391kg { color: var(--muted-text) !important; }
+div[data-testid="stSidebar"] .css-1d391kg {{ color: var(--muted-text) !important; }}
 
-div[data-testid="stAppViewContainer"] {
+div[data-testid="stAppViewContainer"] {{
     background: transparent !important;
-}
+}}
 
-div[data-testid="stHeader"] {
+div[data-testid="stHeader"] {{
     background: transparent !important;
-    border-bottom: 1px solid rgba(255,255,255,0.08) !important;
-}
+    border-bottom: 1px solid {colors['header_border']} !important;
+}}
 
 /* Metric / card styling */
-div[data-testid="metric-container"] {
+div[data-testid="metric-container"] {{
     background: linear-gradient(180deg, var(--panel), var(--panel-alt)) !important;
     border-radius: 14px !important;
     padding: 16px !important;
-    border: 1px solid rgba(255,255,255,0.08) !important;
-    box-shadow: 0 10px 24px rgba(0,0,0,0.30);
-}
+    border: 1px solid var(--border) !important;
+    box-shadow: 0 10px 24px rgba(0,0,0,0.24);
+}}
 
 /* Improve buttons and inputs contrast */
-button, .stButton>button, input, textarea, select {
-    background-color: rgba(255,255,255,0.05) !important;
-    border: 1px solid rgba(255,255,255,0.12) !important;
-    color: var(--muted-text) !important;
-}
+button, .stButton>button, input, textarea, select {{
+    background-color: var(--input-bg) !important;
+    border: 1px solid var(--border) !important;
+    color: var(--text-color) !important;
+}}
 
-input::placeholder, textarea::placeholder {
+input::placeholder, textarea::placeholder {{
     color: rgba(255,255,255,0.55) !important;
-}
+}}
 
 /* Make links and accents pop */
-a, .st-a { color: var(--accent) !important; }
+a, .st-a {{ color: var(--accent) !important; }}
 
-div[class*="plotly"] {
+div[class*="plotly"] {{
     background: transparent !important;
-}
+}}
 
 /* Ensure good spacing on small screens */
-@media (max-width: 900px) {
-    .block-container{ padding-left: 0.75rem; padding-right: 0.75rem; }
-}
+@media (max-width: 900px) {{
+    .block-container{{ padding-left: 0.75rem; padding-right: 0.75rem; }}
+}}
 
 </style>
 """, unsafe_allow_html=True)
@@ -233,6 +271,14 @@ model = load_model()
 # -------------------------------------------------------
 
 st.sidebar.title("🏢 HR Analytics")
+
+st.sidebar.write("### Theme")
+st.session_state["theme"] = st.sidebar.radio(
+    "Select mode",
+    ["Dark", "Light"],
+    index=0 if st.session_state["theme"] == "Dark" else 1,
+    key="theme_selector",
+)
 
 if st.session_state.next_page:
     st.session_state.selected_page_widget = st.session_state.next_page
